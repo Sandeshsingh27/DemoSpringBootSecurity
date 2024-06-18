@@ -7,9 +7,9 @@
 <title>Insert title here</title>
 </head>
 <body>
-
-Welcome Sandesh😊<br>
-<a href = "/logout">Logout</a>
-
+	<h1>Logout Successful</h1>
+    <p>You have been successfully logged out.</p>
+    <a href="/">Go to Home Page</a><br>
+    <a href="/login">Login again</a>
 </body>
 </html>

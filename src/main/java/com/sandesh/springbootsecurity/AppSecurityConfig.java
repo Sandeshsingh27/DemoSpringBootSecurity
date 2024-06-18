@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,16 +24,31 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class AppSecurityConfig {
-
+	
+    
+    @Autowired
+	private UserDetailsService userDetailsService;
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable() // Disable CSRF protection
-                .authorizeRequests(authorize -> authorize
-                        .requestMatchers("/login/**").permitAll() // Allow all to access /login/**
-                        .anyRequest().authenticated()) // All other requests need authentication
-                .httpBasic() // Use HTTP Basic Authentication
-                .and()
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Stateless session management
+        http.csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/login", "/logout-success", "/login-error", "/auth-status").permitAll()
+                .anyRequest().authenticated())
+            .formLogin(formLogin -> formLogin
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/login-error")
+                .permitAll())
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/logout-success")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID"))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }
@@ -49,28 +65,15 @@ public class AppSecurityConfig {
 //        return new InMemoryUserDetailsManager(user);
 //    }
     
-    @Autowired
-	private UserDetailsService userDetailsService;
-	
 	@Bean
 	public AuthenticationProvider authProvider()
 	{
-		DaoAuthenticationProvider provider =new DaoAuthenticationProvider();
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
 		provider.setUserDetailsService(userDetailsService);
-//		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); password is 1234
+//		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); // password is 1234
 		provider.setPasswordEncoder(new BCryptPasswordEncoder());  // password is 123
 		
 		return provider;
 	}
-	
-	 @Bean
-	    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity http) throws Exception {
-	        http.logout()
-	                .logoutUrl("/logout") // Specify your logout URL
-	                .invalidateHttpSession(true) // Invalidate HTTP session
-	                .deleteCookies("JSESSIONID"); // Clear cookies if any
-
-	        return http.build();
-	    }
 
 }
