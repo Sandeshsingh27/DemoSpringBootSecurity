@@ -57,8 +57,20 @@ public class AppSecurityConfig {
 	{
 		DaoAuthenticationProvider provider =new DaoAuthenticationProvider();
 		provider.setUserDetailsService(userDetailsService);
-		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
+//		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); password is 1234
+		provider.setPasswordEncoder(new BCryptPasswordEncoder());  // password is 123
+		
 		return provider;
 	}
+	
+	 @Bean
+	    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity http) throws Exception {
+	        http.logout()
+	                .logoutUrl("/logout") // Specify your logout URL
+	                .invalidateHttpSession(true) // Invalidate HTTP session
+	                .deleteCookies("JSESSIONID"); // Clear cookies if any
+
+	        return http.build();
+	    }
 
 }
