@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
+//import org.springframework.boot.autoconfigure.security.oauth2.client.EnableOAuth2Sso;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,35 +24,34 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableOAuth2Sso
+//@EnableOAuth2Sso
 public class AppSecurityConfig {
 	
     
-//    @Autowired
-//	private UserDetailsService userDetailsService;
+    @Autowired
+	private UserDetailsService userDetailsService;
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/login", "/logout-success", "/login-error", "/auth-status").permitAll()
-                .anyRequest().authenticated());
+                .anyRequest().authenticated())
+            .formLogin(formLogin -> formLogin
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/", true)
+                .failureUrl("/login-error")
+                .permitAll())
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/logout-success")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID"))
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
-//            .formLogin(formLogin -> formLogin
-//                .loginPage("/login")
-//                .loginProcessingUrl("/login")
-//                .defaultSuccessUrl("/", true)
-//                .failureUrl("/login-error")
-//                .permitAll())
-//            .logout(logout -> logout
-//                .logoutUrl("/logout")
-//                .logoutSuccessUrl("/logout-success")
-//                .invalidateHttpSession(true)
-//                .clearAuthentication(true)
-//                .deleteCookies("JSESSIONID"))
-//            .sessionManagement(session -> session
-//                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
-//
         return http.build();
     }
     
@@ -68,15 +67,15 @@ public class AppSecurityConfig {
 //        return new InMemoryUserDetailsManager(user);
 //    }
     
-//	@Bean
-//	public AuthenticationProvider authProvider()
-//	{
-//		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-//		provider.setUserDetailsService(userDetailsService);
-////		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); // password is 1234
-//		provider.setPasswordEncoder(new BCryptPasswordEncoder());  // password is 123
-//		
-//		return provider;
-//	}
+	@Bean
+	public AuthenticationProvider authProvider()
+	{
+		DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+		provider.setUserDetailsService(userDetailsService);
+//		provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance()); // password is 1234
+		provider.setPasswordEncoder(new BCryptPasswordEncoder());  // password is 123
+		
+		return provider;
+	}
 
 }
