@@ -33,12 +33,12 @@ public class HomeController {
         return "login-error";
     }
 	
-	@GetMapping("user")
-	@ResponseBody
-	public Principal user(Principal principal)
-	{
-		return principal;
-	}
+//	@GetMapping("user")
+//	@ResponseBody
+//	public Principal user(Principal principal)
+//	{
+//		return principal;
+//	}
 	
 	@GetMapping("/check-auth")
     public String checkAuthentication() {

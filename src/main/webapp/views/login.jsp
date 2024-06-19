@@ -1,22 +1,22 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+    <meta charset="UTF-8">
+    <title>Login</title>
 </head>
 <body>
 
-<h1>LogIn</h1>
+<h1>Login</h1>
 
-${SPRING_SECURITY_LAST_EXCEPTION.message} <!-- Displays any authentication error message -->
+<%-- Display error message if SPRING_SECURITY_LAST_EXCEPTION is not null --%>
+<% if (request.getAttribute("SPRING_SECURITY_LAST_EXCEPTION") != null) { %>
+    <p style="color: red;"><%= request.getAttribute("SPRING_SECURITY_LAST_EXCEPTION") %></p>
+<% } %>
 
-<form action = "login" method = "post">
-User : <input type = "text" name = "username" value = '' /><br>
-Password : <input type = "password" name = "password" /><br>
-
-<input type = "submit" value = "submit" /><br>
+<form action="/login" method="post">
+    User : <input type="text" name="username" /><br>
+    Password : <input type="password" name="password" /><br>
+    <input type="submit" value="Login" /><br>
 </form>
 
 </body>
